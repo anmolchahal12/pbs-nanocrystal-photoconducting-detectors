@@ -1,9 +1,22 @@
-# Analysis workflows
+# Analysis
 
-- **replicate.py** runs the three analyses from the bundled raw CSVs. It passes the fitted dark I–V resistance to the detector calculation.
-- **absorbance.py** reconstructs absorbance from dark-corrected counts and applies the Moreels sizing curve to the report's estimated first-exciton interval.
-- **iv.py** fits the near-zero-bias portions of the dark and illuminated sweeps and reproduces Fig. 14.
-- **detector.py** calibrates the measured lock-in scans on a common wavelength grid, calculates responsivity, and estimates Johnson-limited detectivity and the half-maximum cutoff. It also accepts an already calibrated spectral CSV.
-- **microscopy.py** plots the reported TEM statistics, recalculates the Scherrer coherent lengths, and converts areas from supplied ImageJ tables into particle diameters.
+Run the optical and electrical analysis from the repository root.
 
-See the [project README](../README.md) for the run commands and input columns.
+```sh
+python analysis/replicate.py --output-dir results
+```
+
+- **absorbance.py** calculates absorbance from dark-corrected spectrometer counts and estimates nanocrystal diameter using the Moreels sizing relation.
+- **iv.py** fits the near-zero-bias sections of the dark and illuminated sweeps.
+- **detector.py** calibrates photocurrent and optical power on a common wavelength grid and calculates responsivity, Johnson-noise-limited detectivity, and the half-maximum cutoff.
+- **microscopy.py** analyzes ImageJ area exports and uses fitted diffraction peak widths to estimate coherent length.
+- **particle_histogram.py** digitizes the two HAADF-STEM histogram panels and plots the field and pooled particle-size distributions.
+
+The pipeline passes the fitted dark resistance to the detectivity calculation.
+
+Generate the microscopy plots and bin counts with the following commands.
+
+```sh
+python analysis/microscopy.py --out-dir results
+python analysis/particle_histogram.py --output-dir results
+```

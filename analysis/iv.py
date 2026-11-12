@@ -1,4 +1,4 @@
-"""Reproduce the dark and illuminated current–voltage curves in report Fig. 14."""
+"""Analyze dark and illuminated current–voltage measurements."""
 
 import argparse
 import csv
@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COLUMNS = ("voltage_v", "current_a", "elapsed_time_s")
 DISPLAY_WINDOW_V = (-0.90, 0.90)
-# The first and last measured points visible in each original inset.
+# Near-zero-bias fitting windows for the dark and illuminated sweeps.
 DARK_FIT_WINDOW_V = (-0.05, 0.15)
 LIGHT_FIT_WINDOW_V = (-0.10, 0.20)
 
@@ -169,7 +169,7 @@ def main() -> None:
         light_fit = fit_resistance(light, LIGHT_FIT_WINDOW_V)
         summary = {
             "method": "Ordinary least squares I = slope × V + intercept. R = 1 / slope.",
-            "fit_window_source": "Voltage coordinates of measured points in the original Fig. 14 insets.",
+            "fit_window_source": "Selected near-zero-bias voltage intervals.",
             "display_window_v": DISPLAY_WINDOW_V,
             "dark_resistance_ohm": dark_fit.resistance_ohm,
             "illuminated_resistance_ohm": light_fit.resistance_ohm,

@@ -1,4 +1,4 @@
-"""Recompute detector metrics and reproduce the measured spectral response."""
+"""Calculate detector responsivity and Johnson-noise-limited detectivity."""
 
 import argparse
 import csv
@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BOLTZMANN_J_PER_K = 1.380649e-23
 LOAD_RESISTANCE_OHM = 1_000_000
 STEP45_SENSITIVITY_V_PER_W = 10_560
-REPORT_RESPONSE_LIMITS_NM = (1050, 1600)
+RESPONSE_PLOT_LIMITS_NM = (1050, 1600)
 PHOTOCURRENT_CSV = ROOT / "data/raw/photocurrent_scan.csv"
 PYROMETER_CSV = ROOT / "data/raw/pyrometer.csv"
 INSTRUMENT_COLUMNS = ("wavelength_nm", "lockin_voltage_v", "phase")
@@ -58,7 +58,7 @@ def load_reported_summary(path: Path) -> dict:
 
 
 def recompute_summary(reported: dict) -> dict:
-    """Use the equilibrium noise of the reported near-zero-bias dark resistance."""
+    """Calculate equilibrium noise from the near-zero-bias dark resistance."""
     aperture_area_mm2 = math.pi * (reported["calibration_aperture_diameter_mm"] / 2) ** 2
     area_fraction = reported["active_area_mm2"] / aperture_area_mm2
     area_cm2 = reported["active_area_mm2"] / 100
@@ -177,7 +177,7 @@ def spectrum_metrics(points: list[SpectrumPoint]) -> dict:
 def plot_raw_spectrum(points: list[SpectrumPoint], metrics: dict,
                       photocurrent: dict[float, float], aperture_power: dict[float, float],
                       aperture_area_mm2: float, detectivity_factor: float, directory: Path) -> None:
-    """Rebuild the three panels of the report from the acquired and calibrated scans."""
+    """Plot photocurrent, incident power density, responsivity and detectivity."""
     import matplotlib
 
     matplotlib.use("Agg")
@@ -197,7 +197,7 @@ def plot_raw_spectrum(points: list[SpectrumPoint], metrics: dict,
     response_ax.plot([point.wavelength_nm for point in points],
                      [point.responsivity_a_per_w for point in points], color=line_color, lw=1.6)
     response_ax.set(title="(c) Responsivity and detectivity", ylabel="Responsivity (A/W)",
-                    xlim=REPORT_RESPONSE_LIMITS_NM, ylim=(0, None))
+                    xlim=RESPONSE_PLOT_LIMITS_NM, ylim=(0, None))
     dstar_axis = response_ax.secondary_yaxis(
         "right", functions=(lambda value: value * detectivity_factor,
                             lambda value: value / detectivity_factor)
@@ -273,7 +273,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--summary", type=Path, default=ROOT / "data/reported/detector.json")
     source = parser.add_mutually_exclusive_group()
-    source.add_argument("--raw", action="store_true", help="Rebuild Figure 15 from the archived scans.")
+    source.add_argument("--raw", action="store_true", help="Analyze the bundled detector and pyrometer scans.")
     source.add_argument("--spectra", type=Path,
                         help="Measured CSV with " + ", ".join(SPECTRUM_COLUMNS))
     parser.add_argument("--iv-summary", type=Path, help="Use the resistances fitted from raw I–V scans.")
@@ -281,10 +281,8 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        reported = load_reported_summary(args.summary)
-        recalculated = recompute_summary(reported)
-        inputs = reported.copy()
-        resistance_source = "Reported near-zero-bias I–V fits."
+        inputs = load_reported_summary(args.summary)
+        resistance_source = "Near-zero-bias resistance supplied in the detector settings."
         if args.iv_summary:
             fields = ("dark_resistance_ohm", "illuminated_resistance_ohm")
             iv = load_summary(args.iv_summary, fields)
@@ -294,8 +292,16 @@ def main() -> None:
         noise_current = calibration["johnson_current_noise_a_per_sqrt_hz"]
         detectivity_factor = math.sqrt(inputs["active_area_mm2"] / 100) / noise_current
         summary = {
-            "reported": reported,
-            "recomputed_from_reported": recalculated,
+            "detector_settings": {
+                key: inputs[key]
+                for key in (
+                    "active_area_mm2",
+                    "calibration_aperture_diameter_mm",
+                    "temperature_k",
+                    "dark_resistance_ohm",
+                    "illuminated_resistance_ohm",
+                )
+            },
             "power_calibration": (
                 "The average irradiance over the calibration aperture is assumed to "
                 "represent the irradiance at the detector."
@@ -348,7 +354,7 @@ def main() -> None:
                 "paired_sample_count": len(points),
                 "wavelength_alignment": "Exact matching between the 5 nm and 10 nm scan grids.",
                 "paired_wavelength_range_nm": [points[0].wavelength_nm, points[-1].wavelength_nm],
-                "response_plot_window_nm": list(REPORT_RESPONSE_LIMITS_NM),
+                "response_plot_window_nm": list(RESPONSE_PLOT_LIMITS_NM),
                 "peak_photocurrent_a": photocurrent[peak_current_wavelength],
                 "peak_photocurrent_wavelength_nm": peak_current_wavelength,
                 "peak_aperture_power_w": aperture_power[peak_power_wavelength],
@@ -366,6 +372,9 @@ def main() -> None:
             metrics["johnson_current_noise_a_per_sqrt_hz"] = noise_current
             metrics["peak_johnson_nep_w_per_sqrt_hz"] = noise_current / metrics["peak_responsivity_a_per_w"]
             summary["computed_from_input_spectrum"] = metrics
+        else:
+            summary["detector_settings"]["peak_responsivity_a_per_w"] = inputs["peak_responsivity_a_per_w"]
+            summary["detector_metrics"] = calibration
 
         args.output_dir.mkdir(parents=True, exist_ok=True)
         if points is not None:

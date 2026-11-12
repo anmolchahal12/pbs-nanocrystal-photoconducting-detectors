@@ -1,4 +1,4 @@
-"""Compare reported PbS microscopy results and analyze optional ImageJ area exports."""
+"""Analyze PbS particle diameters and electron-diffraction peak widths."""
 
 from __future__ import annotations
 
@@ -143,7 +143,7 @@ def save_plot(fig, path: Path) -> None:
 
 def plot_reported_tem(fields: list[dict], path: Path) -> None:
     fig, ax = new_plot(
-        "Reported TEM particle diameters", "Image field", "Diameter (nm)"
+        "HAADF-STEM particle diameters", "Image field", "Diameter (nm)"
     )
     ax.errorbar(
         [field["field"] for field in fields],
@@ -167,16 +167,13 @@ def plot_scherrer(scherrer: dict, path: Path) -> None:
     peaks = scherrer["peaks"]
     positions = range(len(peaks))
     ax.scatter(
-        positions, [p["reported_length_nm"] for p in peaks], color=TEAL,
-        s=54, label="Reported lengths",
+        positions, [p["recalculated_length_nm"] for p in peaks], color=TEAL,
+        s=54, label="Coherent-domain length", zorder=3,
     )
-    ax.scatter(
-        positions, [p["recalculated_length_nm"] for p in peaks], color=INK,
-        marker="+", s=105, label="Recalculated from rounded widths", zorder=3,
-    )
+    mean_length = scherrer["recalculated_mean_length_nm"]
     ax.axhline(
-        scherrer["reported_mean_length_nm"], color=BLUE, linestyle="--",
-        linewidth=1, label="Reported mean",
+        mean_length, color=BLUE, linestyle="--",
+        linewidth=1, label=f"Mean ({mean_length:.2f} nm)",
     )
     ax.set_xticks(
         positions, [f"{p['angle_deg']}°\n{p['reflection']}" for p in peaks]

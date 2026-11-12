@@ -1,4 +1,4 @@
-"""Reproduce Figure 10 from the PbS spectrometer measurements."""
+"""Analyze the optical absorbance of PbS nanocrystals."""
 
 from __future__ import annotations
 
@@ -30,12 +30,10 @@ MOREELS_BULK_GAP_EV = 0.41
 MOREELS_QUADRATIC = 0.0252
 MOREELS_LINEAR = 0.283
 MOREELS_DIAMETER_RANGE_NM = (3.9, 13.3)
-# The wavelength-axis ticks and published diameters agree on these shaded
-# bounds. The report rounds their reciprocal energies to 0.69–0.71 eV.
-REPORT_FIRST_EXCITON_RANGE_NM = (1750.0, 1800.0)
-# The reported solid trace ends near 0.7054 eV, at the final two adjacent
-# low-count readings of about 0.196 a.u. The export continues two rows farther.
-REPORT_TRACE_LAST_WAVELENGTH_NM = 1757.72
+# Estimated first-exciton interval at the long-wavelength limit.
+FIRST_EXCITON_RANGE_NM = (1750.0, 1800.0)
+# Mark the two longest-wavelength samples separately in the plotted scan.
+SOLID_TRACE_LAST_WAVELENGTH_NM = 1757.72
 
 
 @dataclass(frozen=True)
@@ -104,13 +102,13 @@ def find_higher_peak(
 
 
 def write_spectrum_data(
-    points: list[AbsorbancePoint], report_trace: list[AbsorbancePoint], path: Path
+    points: list[AbsorbancePoint], solid_trace: list[AbsorbancePoint], path: Path
 ) -> None:
     columns = (
         *COLUMNS, "photon_energy_ev", "calculated_absorbance_au",
         "calculated_minus_exported_au", "plotted_in_solid_trace",
     )
-    in_trace = set(report_trace)
+    in_trace = set(solid_trace)
     with path.open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=columns)
         writer.writeheader()
@@ -129,7 +127,7 @@ def plot_spectrum(
     points: list[AbsorbancePoint],
     peak: AbsorbancePoint,
     first_exciton_bounds: tuple[float, float],
-    report_trace: list[AbsorbancePoint],
+    solid_trace: list[AbsorbancePoint],
     extension: list[AbsorbancePoint],
     path: Path,
 ) -> None:
@@ -139,8 +137,8 @@ def plot_spectrum(
         label="First-exciton estimate",
     )
     axis.plot(
-        [point.energy_ev for point in report_trace],
-        [point.calculated_absorbance_au for point in report_trace],
+        [point.energy_ev for point in solid_trace],
+        [point.calculated_absorbance_au for point in solid_trace],
         color="#176fa8", linewidth=1.75,
     )
     if extension:
@@ -187,20 +185,20 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results" / "absorbance")
     parser.add_argument(
         "--first-exciton-ev", nargs=2, type=float, metavar=("MIN", "MAX"),
-        help="override the first-exciton estimate inferred from the report's 1750–1800 nm band",
+        help="set the first-exciton energy interval used for size estimation",
     )
     parser.add_argument(
         "--higher-peak-window-ev", nargs=2, type=float, default=(0.83, 0.88),
-        metavar=("MIN", "MAX"), help="search interval around the higher-energy band in Figure 10",
+        metavar=("MIN", "MAX"), help="search interval around the higher-energy absorption band",
     )
     args = parser.parse_args()
 
     try:
         if args.first_exciton_ev is None:
             first_exciton_bounds = tuple(
-                HC_EV_NM / wavelength for wavelength in reversed(REPORT_FIRST_EXCITON_RANGE_NM)
+                HC_EV_NM / wavelength for wavelength in reversed(FIRST_EXCITON_RANGE_NM)
             )
-            interval_source = "1750–1800 nm shaded interval inferred from report Fig. 10"
+            interval_source = "Estimated 1750–1800 nm interval at the long-wavelength edge"
         else:
             first_exciton_bounds = tuple(args.first_exciton_ev)
             interval_source = "user-supplied --first-exciton-ev interval"
@@ -215,20 +213,20 @@ def main() -> None:
         diameters = sorted(moreels_diameter_nm(energy) for energy in first_exciton_bounds)
         first_exciton_wavelengths = [HC_EV_NM / energy for energy in reversed(first_exciton_bounds)]
 
-        uses_original_export = args.input.resolve() == DEFAULT_INPUT.resolve()
-        report_trace = points
-        if uses_original_export:
-            report_trace = [
-                point for point in points if point.wavelength_nm <= REPORT_TRACE_LAST_WAVELENGTH_NM
+        uses_bundled_export = args.input.resolve() == DEFAULT_INPUT.resolve()
+        solid_trace = points
+        if uses_bundled_export:
+            solid_trace = [
+                point for point in points if point.wavelength_nm <= SOLID_TRACE_LAST_WAVELENGTH_NM
             ] or points
-        extension = points[len(report_trace) - 1:] if len(report_trace) < len(points) else []
+        extension = points[len(solid_trace) - 1:] if len(solid_trace) < len(points) else []
 
         summary = {
             "input_csv": args.input.name,
             "sample_count": len(points),
             "wavelength_range_nm": [points[0].wavelength_nm, points[-1].wavelength_nm],
             "solid_trace_wavelength_range_nm": [
-                report_trace[0].wavelength_nm, report_trace[-1].wavelength_nm
+                solid_trace[0].wavelength_nm, solid_trace[-1].wavelength_nm
             ],
             "absorbance_calculation": "log10((reference_counts - dark_counts)/(sample_counts - dark_counts))",
             "max_absolute_difference_from_exported_absorbance_au": max(
@@ -258,8 +256,8 @@ def main() -> None:
                 },
             },
         }
-        if uses_original_export:
-            summary["original_export"] = {
+        if uses_bundled_export:
+            summary["acquisition"] = {
                 "filename": "absorbance_1412003U1.TXT",
                 "spectrometer": "1412003U1",
                 "integration_ms": 17.00,
@@ -270,21 +268,15 @@ def main() -> None:
                     "Dark-corrected sample and reference counts fall near the long-wavelength "
                     "edge. The first-exciton maximum is unresolved in the usable trace."
                 ),
-                "reported_comparison": {
-                    "figure": 10,
-                    "higher_energy_peak_ev": 0.8531,
-                    "diameter_range_nm": [7.2097, 7.5705],
-                    "diameter_difference_nm": [diameters[0] - 7.2097, diameters[1] - 7.5705],
-                },
             }
 
         args.output_dir.mkdir(parents=True, exist_ok=True)
         plot_spectrum(
-            points, peak, first_exciton_bounds, report_trace, extension,
+            points, peak, first_exciton_bounds, solid_trace, extension,
             args.output_dir / "ir-absorbance.png",
         )
         write_spectrum_data(
-            points, report_trace, args.output_dir / "absorbance_recalculated.csv"
+            points, solid_trace, args.output_dir / "absorbance_recalculated.csv"
         )
         (args.output_dir / "absorbance_summary.json").write_text(
             json.dumps(summary, indent=2, allow_nan=False) + "\n", encoding="utf-8"

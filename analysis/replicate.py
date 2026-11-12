@@ -1,4 +1,4 @@
-"""Reproduce report Figs. 10, 14, and 15 from the bundled Group 7 CSVs."""
+"""Run the optical and electrical analyses from the bundled instrument data."""
 
 import argparse
 from pathlib import Path
@@ -30,9 +30,9 @@ def main() -> int:
             check=False,
         )
         if result.returncode:
-            print(f"Replication stopped at {script}.", file=sys.stderr)
+            print(f"Analysis stopped at {script}.", file=sys.stderr)
             return result.returncode
-    print(f"Replicated figures and numerical outputs: {output_dir}")
+    print(f"Figures and numerical results: {output_dir}")
     return 0
 
 
