@@ -1,5 +1,5 @@
 {
-  "source": "PbS Nanocrystal Photoconducting Detectors, shared experimental report, PDF pp. 6–7 and 9–10.",
+  "source": "Detector measurement parameters and recorded peak values.",
   "sample": "Photoconductor fabricated from separately supplied PbS stock.",
   "dark_resistance_ohm": 43840000,
   "illuminated_resistance_ohm": 2220000,
