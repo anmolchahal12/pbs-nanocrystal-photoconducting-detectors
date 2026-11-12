@@ -1,6 +1,6 @@
 {
   "method": "Ordinary least squares I = slope × V + intercept. R = 1 / slope.",
-  "fit_window_source": "Voltage coordinates of measured points in the original Fig. 14 insets.",
+  "fit_window_source": "Selected near-zero-bias voltage intervals.",
   "display_window_v": [
     -0.9,
     0.9
