@@ -1,0 +1,37 @@
+{
+  "method": "Ordinary least squares I = slope × V + intercept. R = 1 / slope.",
+  "fit_window_source": "Voltage coordinates of measured points in the original Fig. 14 insets.",
+  "display_window_v": [
+    -0.9,
+    0.9
+  ],
+  "dark_resistance_ohm": 43838345.22521512,
+  "illuminated_resistance_ohm": 2222966.739654075,
+  "dark_to_illuminated_resistance_ratio": 19.720648286459287,
+  "dark_fit": {
+    "source_csv": "iv_dark.csv",
+    "sweep_point_count": 40,
+    "window_v": [
+      -0.05,
+      0.15
+    ],
+    "point_count": 5,
+    "slope_a_per_v": 2.2811079999999997e-08,
+    "intercept_a": 2.676741999999993e-09,
+    "resistance_ohm": 43838345.22521512,
+    "r_squared": 0.9943945479419263
+  },
+  "illuminated_fit": {
+    "source_csv": "iv_light.csv",
+    "sweep_point_count": 40,
+    "window_v": [
+      -0.1,
+      0.2
+    ],
+    "point_count": 7,
+    "slope_a_per_v": 4.4984928571428565e-07,
+    "intercept_a": 3.527744999999986e-08,
+    "resistance_ohm": 2222966.739654075,
+    "r_squared": 0.9989821952679891
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "input_csv": "absorbance.csv",
+  "sample_count": 256,
+  "wavelength_range_nm": [
+    1033.24,
+    1762.53
+  ],
+  "solid_trace_wavelength_range_nm": [
+    1033.24,
+    1757.72
+  ],
+  "absorbance_calculation": "log10((reference_counts - dark_counts)/(sample_counts - dark_counts))",
+  "max_absolute_difference_from_exported_absorbance_au": 4.991320529557086e-06,
+  "higher_energy_peak_search_window_ev": [
+    0.83,
+    0.88
+  ],
+  "higher_energy_peak": {
+    "wavelength_nm": 1453.28,
+    "energy_ev": 0.8531335902234944,
+    "calculated_absorbance_au": 0.1374711837294236,
+    "exported_absorbance_au": 0.13747
+  },
+  "first_exciton_sizing": {
+    "status": "size estimated from a first-exciton energy interval",
+    "interval_source": "1750\u20131800 nm shaded interval inferred from report Fig. 10",
+    "first_exciton_energy_range_ev": [
+      0.6888011022222221,
+      0.7084811337142857
+    ],
+    "first_exciton_wavelength_range_nm": [
+      1750.0,
+      1800.0000000000002
+    ],
+    "diameter_range_nm": [
+      7.209792974261946,
+      7.570591254083069
+    ],
+    "calibration": {
+      "reference": "Moreels et al., ACS Nano 3 (2009), p. 3024, Eq. (1)",
+      "doi": "10.1021/nn900863a",
+      "diameter_fit_range_nm": [
+        3.9,
+        13.3
+      ],
+      "diameter_interval_within_fit_range": true
+    }
+  },
+  "original_export": {
+    "filename": "absorbance_1412003U1.TXT",
+    "spectrometer": "1412003U1",
+    "integration_ms": 17.0,
+    "averaged_scans": 100,
+    "smoothing_pixels": 0,
+    "additional_edge_wavelengths_nm": [
+      1760.12,
+      1762.53
+    ],
+    "edge_interpretation": "Dark-corrected sample and reference counts fall near the long-wavelength edge. The first-exciton maximum is unresolved in the usable trace.",
+    "reported_comparison": {
+      "figure": 10,
+      "higher_energy_peak_ev": 0.8531,
+      "diameter_range_nm": [
+        7.2097,
+        7.5705
+      ],
+      "diameter_difference_nm": [
+        9.297426194621039e-05,
+        9.125408306864813e-05
+      ]
+    }
+  }
+}

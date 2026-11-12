@@ -1,0 +1,77 @@
+{
+  "reported": {
+    "source": "PbS Nanocrystal Photoconducting Detectors, shared experimental report, PDF pp. 6–7 and 9–10.",
+    "sample": "Photoconductor fabricated from separately supplied PbS stock.",
+    "dark_resistance_ohm": 43840000,
+    "illuminated_resistance_ohm": 2220000,
+    "active_area_mm2": 0.08,
+    "calibration_aperture_diameter_mm": 1.0,
+    "temperature_k": 300,
+    "spectral_supply_voltage_v": 20,
+    "peak_wavelength_nm": 1260,
+    "peak_responsivity_a_per_w": 0.0796,
+    "half_max_cutoff_nm": 1340,
+    "peak_johnson_detectivity_jones": 115820000000
+  },
+  "recomputed_from_reported": {
+    "calibration_aperture_area_mm2": 0.7853981633974483,
+    "active_area_power_fraction": 0.10185916357881303,
+    "dark_to_illuminated_resistance_ratio": 19.74774774774775,
+    "resistance_area_product_ohm_cm2": 35072.0,
+    "johnson_current_noise_a_per_sqrt_hz": 1.9440032722780426e-14,
+    "peak_johnson_nep_w_per_sqrt_hz": 2.4422151661784454e-13,
+    "peak_johnson_detectivity_jones": 115814002136.92413
+  },
+  "power_calibration": "The average irradiance over the calibration aperture is assumed to represent the irradiance at the detector.",
+  "noise_model": "Johnson noise only, using the near-zero-bias dark resistance and stated temperature. Operating noise was not measured.",
+  "raw_scan_calibration": {
+    "photocurrent_scan": "data/raw/photocurrent_scan.csv",
+    "pyrometer_scan": "data/raw/pyrometer.csv",
+    "load_resistance_ohm": 1000000,
+    "active_area_mm2": 0.08,
+    "calibration_aperture_diameter_mm": 1.0,
+    "step45_sensitivity_v_per_w": 10560,
+    "sensitivity_source": "Lead Sulphide Ligand Exchange Documentation, PDF p. 2.",
+    "calibration_aperture_area_mm2": 0.7853981633974483,
+    "active_area_power_fraction": 0.10185916357881303,
+    "photocurrent_sample_count": 122,
+    "photocurrent_wavelength_range_nm": [
+      1000.0,
+      1605.0
+    ],
+    "pyrometer_sample_count": 101,
+    "pyrometer_wavelength_range_nm": [
+      1000.0,
+      2000.0
+    ],
+    "paired_sample_count": 61,
+    "wavelength_alignment": "Exact matching between the 5 nm and 10 nm scan grids.",
+    "paired_wavelength_range_nm": [
+      1000.0,
+      1600.0
+    ],
+    "response_plot_window_nm": [
+      1050,
+      1600
+    ],
+    "peak_photocurrent_a": 3.32968e-08,
+    "peak_photocurrent_wavelength_nm": 1240.0,
+    "peak_aperture_power_w": 4.667604166666667e-06,
+    "peak_incident_power_density_w_per_mm2": 5.942978204170615e-06,
+    "peak_power_wavelength_nm": 1170.0
+  },
+  "computed_from_input_spectrum": {
+    "peak_wavelength_nm": 1260.0,
+    "peak_responsivity_a_per_w": 0.0796077529022191,
+    "peak_johnson_detectivity_jones": 115823096242.1072,
+    "half_max_cutoff_nm": 1339.7290717232981,
+    "first_sample_at_or_below_half_max_nm": 1340.0,
+    "cutoff_definition": "First falling half-maximum crossing at wavelengths above the peak, linearly interpolated. Null when outside the scanned range.",
+    "dark_resistance_ohm": 43838345.22521512,
+    "illuminated_resistance_ohm": 2222966.739654075,
+    "resistance_source": "Raw I–V fits from iv_summary.json.",
+    "temperature_k": 300,
+    "johnson_current_noise_a_per_sqrt_hz": 1.9440399622719694e-14,
+    "peak_johnson_nep_w_per_sqrt_hz": 2.4420234102824156e-13
+  }
+}
