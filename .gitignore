@@ -2,7 +2,15 @@
 .venv/
 __pycache__/
 *.py[cod]
-/data/raw/
+/data/raw/*
+!/data/raw/README.md
+!/data/raw/absorbance.csv
+!/data/raw/iv_dark.csv
+!/data/raw/iv_dark_negative.csv
+!/data/raw/iv_dark_positive.csv
+!/data/raw/iv_light.csv
+!/data/raw/photocurrent_scan.csv
+!/data/raw/pyrometer.csv
 /results/
 /latex_report/
 /output/
