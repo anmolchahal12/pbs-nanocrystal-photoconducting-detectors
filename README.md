@@ -1,61 +1,43 @@
 # PbS Nanocrystal Photoconducting Detectors
 
-Reproduction of three figures from a materials science and engineering project on near-infrared lead sulfide (PbS) nanocrystal photoconductors. Absorbance and electron microscopy characterized the synthesized PbS colloid. The electrical and spectral scans used a photoconductor fabricated from a separate PbS batch.
+**Anmol Chahal**
 
-## Replication results
+Optical and electrical characterization of colloidal lead sulfide (PbS) nanocrystals and a near-infrared photoconductor. The analysis uses spectrometer counts, current–voltage sweeps, and calibrated detector scans. The colloid and the photoconductor used separate PbS batches.
 
-| Quantity | Project report | Recalculated from Group 7 exports |
-| --- | ---: | ---: |
-| Higher-energy absorbance peak | 0.8531 eV | 0.853134 eV at 1453.28 nm |
-| Diameter inferred from the estimated first exciton | 7.2097–7.5705 nm | 7.2098–7.5706 nm |
-| Dark differential resistance | 43.84 MΩ | 43.8383 MΩ |
-| Illuminated differential resistance | 2.22 MΩ | 2.2230 MΩ |
-| Peak current responsivity | 0.0796 A/W at 1260 nm | 0.0796078 A/W at 1260 nm |
-| Long-wavelength half-maximum cutoff | 1340 nm | 1339.73 nm by interpolation |
-| Peak Johnson-limited specific detectivity | 1.1582 × 10¹¹ Jones | 1.15823 × 10¹¹ Jones |
+## Results
 
-The diameter estimate uses the 1750–1800 nm interval inferred from the original figure. The first-exciton maximum is unresolved at the usable long-wavelength edge of the scan. Specific detectivity uses a Johnson-noise model at 300 K and the fitted dark differential resistance.
+| Quantity | Value |
+| --- | ---: |
+| Higher-energy absorbance peak | 0.853134 eV at 1453.28 nm |
+| Diameter estimated from the first exciton | 7.2098–7.5706 nm |
+| HAADF-STEM particle diameter, mean ± SD | 7.1378 ± 0.3204 nm |
+| Mean Scherrer coherent-domain length | 5.3183 nm |
+| Dark / illuminated differential resistance | 43.8383 / 2.2230 MΩ |
+| Peak responsivity | 0.0796078 A/W at 1260 nm |
+| Long-wavelength half-maximum cutoff | 1339.73 nm |
+| Peak Johnson-limited specific detectivity | 1.15823 × 10¹¹ Jones at 300 K |
 
-| Report figure | Original plot | Reproduced plot |
-| --- | --- | --- |
-| Fig. 10 · Colloid absorbance | [Original](figures/ir-absorbance.png) | [From spectrometer counts](replicated/ir-absorbance.png) |
-| Fig. 14 · Dark and illuminated I–V | [Original](figures/current-voltage.png) | [From recorded I–V sweeps](replicated/current-voltage.png) |
-| Fig. 15 · Detector spectral response | [Original](figures/spectral-response.png) | [From device and calibration scans](replicated/spectral-response.png) |
+The first-exciton maximum is unresolved at the long-wavelength edge of the scan. The diameter estimate applies Moreels Eq. (1) to a 1750–1800 nm interval. Detectivity uses a Johnson-noise model with the fitted dark resistance. [Moreels et al.](https://doi.org/10.1021/nn900863a)
 
-![Reproduced photocurrent, power density, responsivity, and Johnson-limited detectivity](replicated/spectral-response.png)
+[Infrared absorbance](replicated/ir-absorbance.png) · [Dark and illuminated I–V](replicated/current-voltage.png) · [Processed tables and methods](replicated/)
 
-## Reproduce the results
+![Photocurrent, incident power density, responsivity, and Johnson-limited detectivity](replicated/spectral-response.png)
 
-Use Python 3.10 or later. The [seven input CSVs](data/raw/) preserve the numerical readings and acquisition order of the Group 7 instrument exports.
+## Run the analysis
+
+Use Python 3.10 or later with the [instrument CSVs](data/raw/).
 
 ~~~sh
-python -m venv .venv
-source .venv/bin/activate
 python -m pip install -r requirements.txt
-python analysis/replicate.py --output-dir results/replication
+python analysis/replicate.py --output-dir results
 ~~~
 
-The command rebuilds the three figures and writes intermediate CSVs and calculation summaries. It fits the I–V sweeps before using the dark resistance in the spectral detectivity calculation. [Saved results and calculation details](replicated/)
+The pipeline calculates absorbance from dark-corrected counts, fits the near-zero-bias I–V curves, and calibrates responsivity and detectivity on the shared wavelength grid. It saves the three figures, processed CSVs, and numerical summaries.
 
-For an already calibrated detector spectrum, provide **wavelength_nm**, **photocurrent_a**, and **aperture_power_w**. For particle-level data, provide one ImageJ CSV per field with an **Area** column.
+The microscopy workflow uses the available particle statistics and diffraction peak widths. Particle-level histograms can be generated from calibrated ImageJ area exports. [Microscopy analysis](analysis/microscopy.py) · [Particle and diffraction inputs](data/reported/)
 
-~~~sh
-python analysis/detector.py --spectra path/to/spectrum.csv --output-dir results/detector
-python analysis/microscopy.py --out-dir results/microscopy \
-  --particles-csv path/to/field-a.csv \
-  --particles-csv path/to/field-b.csv --area-unit nm2
-~~~
+## References
 
-Use **--area-unit px2 --nm-per-pixel SCALE** for pixel-area tables. Each command assumes a common pixel calibration across its supplied fields.
-
-## Microscopy evidence
-
-The [original HAADF-STEM figure](figures/dark-field-tem.png) reports a pooled diameter of 7.1378 ± 0.3204 nm (mean ± SD). The reported diffraction widths give a mean Scherrer coherent length of 5.3183 nm. The Group 7 archive and related project files provided the reported values and plots for these analyses. Particle-level ImageJ tables and SAED line profiles remain unavailable. The microscopy script reproduces the [mean-and-SD comparison](figures/tem-reported-summary.png) and [Scherrer length comparison](figures/scherrer-comparison.png) from the [reported tables](data/reported/).
-
-## Sources
-
-- Group 7 instrument exports and *Lead Sulphide Ligand Exchange Documentation*, p. 2, for the 10,560 V/W Step-45 calibration and the detector area.
-- Project team report, *PbS Nanocrystal Photoconducting Detectors* (2025), pp. 6–10, Table 1 and Figs. 10–15, for the original plots, reported measurements and fit comparisons. Anmol Chahal prepared the repository from the project team's shared work.
-- Moreels et al., *ACS Nano* **3**, 3023–3030 (2009), Eq. (1) and Fig. 2, for the empirical PbS diameter calibration over 3.9–13.3 nm. [Paper](https://doi.org/10.1021/nn900863a)
-- Killilea et al., *Advanced Functional Materials* **29**, 1807964 (2019), for PbS ligand-shell photoconductor design and the relation between particle size and infrared response. [Paper](https://doi.org/10.1002/adfm.201807964)
-- De Iacovo et al., *Scientific Reports* **6**, 37913 (2016), and *Applied Physics Letters* **111**, 211104 (2017), for near-infrared PbS photoconductors and experimental noise characterization. [Photoconductor measurements](https://doi.org/10.1038/srep37913) · [Noise measurements](https://doi.org/10.1063/1.5005805)
+- Moreels et al., *ACS Nano* **3**, 3023–3030 (2009). Empirical PbS diameter calibration. [Paper](https://doi.org/10.1021/nn900863a)
+- Killilea et al., *Advanced Functional Materials* **29**, 1807964 (2019). PbS ligand-shell photoconductor design. [Paper](https://doi.org/10.1002/adfm.201807964)
+- De Iacovo et al., *Applied Physics Letters* **111**, 211104 (2017). Experimental noise characterization of PbS photoconductors. [Paper](https://doi.org/10.1063/1.5005805)
